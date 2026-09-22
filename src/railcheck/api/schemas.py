@@ -32,3 +32,12 @@ class GateCheckResponse(BaseModel):
     backend: str
     answers: list[AnswerOut]
     created_at: str
+
+
+class GateBatchCheckRequest(BaseModel):
+    items: list[GateCheckRequest] = Field(..., min_length=1, max_length=100)
+
+
+class GateBatchCheckResponse(BaseModel):
+    results: list[GateCheckResponse]
+    count: int

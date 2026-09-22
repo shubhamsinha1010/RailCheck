@@ -8,7 +8,6 @@ from railcheck.ports.audit_repository import AuditRepository
 from railcheck.ports.decision_engine import DecisionEngine
 from railcheck.ports.review_queue import ReviewQueueRepository
 
-# Actions that cannot be auto-applied and need a human in the loop.
 _QUEUEABLE_ACTIONS = frozenset({GateAction.HUMAN_REVIEW, GateAction.REWRITE})
 
 
@@ -59,3 +58,7 @@ class GateService:
         if self._reviews is not None and result.action in _QUEUEABLE_ACTIONS:
             self._reviews.enqueue(ReviewItem.pending(result=result, context=context))
         return result
+
+    def check_batch(self, contexts: list[GateContext]) -> list[GateResult]:
+        """Evaluate many candidates; order of results matches the input order."""
+        return [self.check(context) for context in contexts]

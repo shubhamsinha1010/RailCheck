@@ -23,3 +23,5 @@ class Settings(BaseSettings):
     harm_block_score: float = 2.0
     host: str = "0.0.0.0"
     port: int = 8080
+    max_batch_size: int = 50
+    api_key: str = ""
