@@ -35,3 +35,7 @@ class ReviewResolution(StrEnum):
     ALLOW = "allow"
     BLOCK = "block"
     REWRITE = "rewrite"
+
+
+# Special outcome field: overall gate disposition correctness.
+GATE_ACTION_FIELD = "gate_action"

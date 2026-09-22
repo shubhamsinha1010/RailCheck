@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import Request
 
+from railcheck.application.calibration_service import CalibrationService
 from railcheck.application.gate_service import GateService
 from railcheck.application.review_service import ReviewService
 from railcheck.config import Settings
@@ -22,3 +23,7 @@ def get_audit_repository(request: Request) -> AuditRepository:
 
 def get_review_service(request: Request) -> ReviewService:
     return request.app.state.review_service
+
+
+def get_calibration_service(request: Request) -> CalibrationService:
+    return request.app.state.calibration_service

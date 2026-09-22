@@ -150,3 +150,16 @@ class ReviewItem:
             note=note,
             rewritten_output=rewritten_output,
         )
+
+
+@dataclass(frozen=True, slots=True)
+class OutcomeRecord:
+    """Ground-truth label for a prior gate decision, used for calibration."""
+
+    request_id: UUID
+    field_key: str
+    label: str
+    labeled_by: str
+    labeled_at: datetime = field(default_factory=utc_now)
+    note: str | None = None
+    id: UUID = field(default_factory=uuid4)

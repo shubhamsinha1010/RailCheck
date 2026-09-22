@@ -4,8 +4,10 @@ from fastapi import FastAPI
 
 from railcheck.adapters.backends.factory import DecisionEngineFactory
 from railcheck.adapters.persistence.memory_audit import InMemoryAuditRepository
+from railcheck.adapters.persistence.memory_outcomes import InMemoryOutcomeRepository
 from railcheck.adapters.persistence.memory_review_queue import InMemoryReviewQueueRepository
-from railcheck.api.routes import gate, health, reviews
+from railcheck.api.routes import calibration, gate, health, reviews
+from railcheck.application.calibration_service import CalibrationService
 from railcheck.application.gate_service import GateService
 from railcheck.application.review_service import ReviewService
 from railcheck.config import Settings
@@ -19,8 +21,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     engine = DecisionEngineFactory.create(settings)
     audit = InMemoryAuditRepository()
+    outcomes = InMemoryOutcomeRepository()
+    calibration_service = CalibrationService(audits=audit, outcomes=outcomes)
     review_queue = InMemoryReviewQueueRepository()
-    review_service = ReviewService(review_queue)
+    review_service = ReviewService(review_queue, calibration=calibration_service)
     policy = PolicyEngine(
         ConfidenceBands(
             allow_min_confidence=settings.allow_threshold,
@@ -45,12 +49,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.gate_service = gate_service
     app.state.audit_repository = audit
+    app.state.outcome_repository = outcomes
+    app.state.calibration_service = calibration_service
     app.state.review_service = review_service
     app.state.review_queue = review_queue
 
     app.include_router(health.router)
     app.include_router(gate.router)
     app.include_router(reviews.router)
+    app.include_router(calibration.router)
     return app
 
 

@@ -26,6 +26,10 @@ Hexagonal layout with SOLID boundaries:
 
 Human-in-the-loop: `human_review` and `rewrite` dispositions are enqueued automatically.
 Reviewers list pending items and resolve via `POST /v1/reviews/{id}/resolve`.
+Resolving a review also records a `gate_action` outcome for calibration.
+
+Label any field after the fact with `POST /v1/outcomes`, then inspect
+`GET /v1/calibration?field=policy_violation` for ECE / Brier / reliability bins.
 
 ```text
 LLM / Agent output

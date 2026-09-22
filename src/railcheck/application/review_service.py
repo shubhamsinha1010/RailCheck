@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from railcheck.domain.enums import ReviewResolution, ReviewStatus
+from railcheck.application.calibration_service import AuditMissingError, CalibrationService
+from railcheck.domain.enums import GATE_ACTION_FIELD, ReviewResolution, ReviewStatus
 from railcheck.domain.models import GateContext, GateResult, ReviewItem
 from railcheck.ports.review_queue import ReviewQueueRepository
 
@@ -18,8 +19,14 @@ class ReviewConflictError(ValueError):
 class ReviewService:
     """Human-in-the-loop use cases over the review queue port."""
 
-    def __init__(self, queue: ReviewQueueRepository) -> None:
+    def __init__(
+        self,
+        queue: ReviewQueueRepository,
+        *,
+        calibration: CalibrationService | None = None,
+    ) -> None:
         self._queue = queue
+        self._calibration = calibration
 
     def enqueue_from_gate(self, *, result: GateResult, context: GateContext) -> ReviewItem:
         item = ReviewItem.pending(result=result, context=context)
@@ -58,4 +65,26 @@ class ReviewService:
         except ValueError as exc:
             raise ReviewConflictError(str(exc)) from exc
         self._queue.save(resolved)
+        self._record_gate_outcome(resolved, resolver=resolver, note=note)
         return resolved
+
+    def _record_gate_outcome(
+        self,
+        resolved: ReviewItem,
+        *,
+        resolver: str,
+        note: str | None,
+    ) -> None:
+        if self._calibration is None or resolved.resolution is None:
+            return
+        try:
+            self._calibration.record(
+                request_id=resolved.id,
+                field_key=GATE_ACTION_FIELD,
+                label=resolved.resolution.value,
+                labeled_by=resolver,
+                note=note,
+            )
+        except AuditMissingError:
+            # Review without audit should not break resolve.
+            return
