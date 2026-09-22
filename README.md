@@ -67,7 +67,9 @@ make run
 ```
 
 Optional API key (when `RAILCHECK_API_KEY` is set, send `X-API-Key` or `Authorization: Bearer …`).
-`/demo`, `/healthz`, and OpenAPI docs stay public.
+`/demo`, `/healthz`, `/metrics`, and OpenAPI docs stay public.
+
+Ops endpoints: `GET /v1/audits` (recent decisions) and `GET /metrics` (Prometheus text).
 
 ```bash
 curl -s localhost:8080/v1/check \

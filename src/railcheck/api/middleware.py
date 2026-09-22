@@ -13,6 +13,7 @@ _PUBLIC_PREFIXES = (
     "/openapi.json",
     "/redoc",
     "/demo",
+    "/metrics",
 )
 
 
