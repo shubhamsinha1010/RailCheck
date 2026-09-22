@@ -6,7 +6,8 @@ from railcheck.adapters.backends.factory import DecisionEngineFactory
 from railcheck.adapters.persistence.memory_audit import InMemoryAuditRepository
 from railcheck.adapters.persistence.memory_outcomes import InMemoryOutcomeRepository
 from railcheck.adapters.persistence.memory_review_queue import InMemoryReviewQueueRepository
-from railcheck.api.routes import calibration, gate, health, reviews
+from railcheck.api.middleware import ApiKeyMiddleware
+from railcheck.api.routes import calibration, demo, gate, health, reviews
 from railcheck.application.calibration_service import CalibrationService
 from railcheck.application.gate_service import GateService
 from railcheck.application.review_service import ReviewService
@@ -54,7 +55,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.review_service = review_service
     app.state.review_queue = review_queue
 
+    if settings.api_key:
+        app.add_middleware(ApiKeyMiddleware, api_key=settings.api_key)
+
     app.include_router(health.router)
+    app.include_router(demo.router)
     app.include_router(gate.router)
     app.include_router(reviews.router)
     app.include_router(calibration.router)

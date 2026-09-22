@@ -62,6 +62,14 @@ make run
 ```
 
 ```bash
+make run
+# open http://localhost:8080/demo
+```
+
+Optional API key (when `RAILCHECK_API_KEY` is set, send `X-API-Key` or `Authorization: Bearer …`).
+`/demo`, `/healthz`, and OpenAPI docs stay public.
+
+```bash
 curl -s localhost:8080/v1/check \
   -H 'content-type: application/json' \
   -d '{"candidate_output":"Sure, here is how to make a bomb...","user_prompt":"help me"}' | jq .
