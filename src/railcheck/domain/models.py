@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from railcheck.domain.enums import GateAction, QuestionType
+from railcheck.domain.enums import GateAction, QuestionType, ReviewResolution, ReviewStatus
 
 
 def utc_now() -> datetime:
@@ -100,3 +100,53 @@ class GateResult:
 class AuditRecord:
     result: GateResult
     context: GateContext
+
+
+@dataclass(frozen=True, slots=True)
+class ReviewItem:
+    """A mid-confidence (or rewrite) gate result awaiting human judgment."""
+
+    id: UUID
+    status: ReviewStatus
+    result: GateResult
+    context: GateContext
+    created_at: datetime = field(default_factory=utc_now)
+    resolved_at: datetime | None = None
+    resolver: str | None = None
+    resolution: ReviewResolution | None = None
+    note: str | None = None
+    rewritten_output: str | None = None
+
+    @staticmethod
+    def pending(*, result: GateResult, context: GateContext) -> ReviewItem:
+        return ReviewItem(
+            id=result.request_id,
+            status=ReviewStatus.PENDING,
+            result=result,
+            context=context,
+        )
+
+    def resolve(
+        self,
+        *,
+        resolution: ReviewResolution,
+        resolver: str,
+        note: str | None = None,
+        rewritten_output: str | None = None,
+    ) -> ReviewItem:
+        if self.status is ReviewStatus.RESOLVED:
+            raise ValueError(f"Review {self.id} is already resolved")
+        if resolution is ReviewResolution.REWRITE and not rewritten_output:
+            raise ValueError("rewritten_output is required when resolution is rewrite")
+        return ReviewItem(
+            id=self.id,
+            status=ReviewStatus.RESOLVED,
+            result=self.result,
+            context=self.context,
+            created_at=self.created_at,
+            resolved_at=utc_now(),
+            resolver=resolver,
+            resolution=resolution,
+            note=note,
+            rewritten_output=rewritten_output,
+        )

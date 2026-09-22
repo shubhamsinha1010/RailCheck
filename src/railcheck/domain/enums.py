@@ -22,3 +22,16 @@ class BackendKind(StrEnum):
     FAKE = "fake"
     LAYA = "laya"
     JEV = "jev"
+
+
+class ReviewStatus(StrEnum):
+    PENDING = "pending"
+    RESOLVED = "resolved"
+
+
+class ReviewResolution(StrEnum):
+    """Final disposition chosen by a human reviewer."""
+
+    ALLOW = "allow"
+    BLOCK = "block"
+    REWRITE = "rewrite"

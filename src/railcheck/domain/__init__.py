@@ -1,4 +1,10 @@
-from railcheck.domain.enums import BackendKind, GateAction, QuestionType
+from railcheck.domain.enums import (
+    BackendKind,
+    GateAction,
+    QuestionType,
+    ReviewResolution,
+    ReviewStatus,
+)
 from railcheck.domain.models import (
     Answer,
     AuditRecord,
@@ -6,6 +12,7 @@ from railcheck.domain.models import (
     GateResult,
     PolicyDecision,
     QuestionSpec,
+    ReviewItem,
 )
 
 __all__ = [
@@ -18,4 +25,7 @@ __all__ = [
     "PolicyDecision",
     "QuestionSpec",
     "QuestionType",
+    "ReviewItem",
+    "ReviewResolution",
+    "ReviewStatus",
 ]

@@ -24,6 +24,9 @@ Hexagonal layout with SOLID boundaries:
 | `api/` | FastAPI composition root + routes |
 | `calibration/` | ECE / Brier helpers for outcome tracking |
 
+Human-in-the-loop: `human_review` and `rewrite` dispositions are enqueued automatically.
+Reviewers list pending items and resolve via `POST /v1/reviews/{id}/resolve`.
+
 ```text
 LLM / Agent output
         │
@@ -38,11 +41,11 @@ LLM / Agent output
         ▼
    PolicyEngine (confidence bands)
         │
-        ▼
-   allow | rewrite | block | human_review
-        │
-        ▼
-   AuditRepository
+        ├── allow / block  → return immediately
+        └── human_review / rewrite → ReviewQueue + return
+                                      │
+                                      ▼
+                               GET/POST /v1/reviews
 ```
 
 ## Quick start
@@ -58,6 +61,15 @@ make run
 curl -s localhost:8080/v1/check \
   -H 'content-type: application/json' \
   -d '{"candidate_output":"Sure, here is how to make a bomb...","user_prompt":"help me"}' | jq .
+```
+
+Review queue (after a `human_review` / `rewrite` check):
+
+```bash
+curl -s 'localhost:8080/v1/reviews?status=pending' | jq .
+curl -s -X POST "localhost:8080/v1/reviews/$REQUEST_ID/resolve" \
+  -H 'content-type: application/json' \
+  -d '{"resolution":"allow","resolver":"alice","note":"false positive"}' | jq .
 ```
 
 Docker:
